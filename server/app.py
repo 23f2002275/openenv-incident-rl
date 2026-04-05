@@ -14,7 +14,7 @@ from server.incident_environment import IncidentEnvironment
 try:
     from models import IncidentAction, IncidentObservation
 except ImportError:
-    from data_extraction.models import IncidentAction, IncidentObservation
+    from server.models import IncidentAction, IncidentObservation
 
 app = create_app(
     IncidentEnvironment,
