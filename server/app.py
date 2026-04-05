@@ -23,6 +23,10 @@ app = create_app(
     max_concurrent_envs=10,
 )
 
+@app.get("/")
+def root():
+    return {"message": "Incident environment is running"}
+
 def main():
     """Entry point for running the server directly."""
     import uvicorn
