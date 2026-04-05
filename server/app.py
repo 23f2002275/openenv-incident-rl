@@ -25,7 +25,11 @@ app = create_app(
 
 @app.get("/")
 def root():
-    return {"message": "Incident environment is running"}
+    return {"status": "ok"}
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
 
 def main():
     """Entry point for running the server directly."""
