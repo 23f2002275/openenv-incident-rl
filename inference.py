@@ -42,7 +42,7 @@ if not API_KEY:
 if not MODEL_NAME: 
     raise ValueError("MODEL_NAME must be set")
 # Environment config
-ENV_URL = os.getenv("ENV_URL", "http://localhost:8000")
+ENV_URL = os.getenv("ENV_URL", "http://localhost:7860")
 BENCHMARK = os.getenv("BENCHMARK", "incident_report_structuring")
 SUCCESS_THRESHOLD = 0.5  # average reward above this = success
 

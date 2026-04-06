@@ -1,19 +1,27 @@
 """
-Grader for the Data Extraction Environment.
+Grader for the Incident Report Structuring Environment.
 
-THE BIG PROBLEM: String matching is tricky.
-  - "New Delhi" vs "Delhi" → should get partial credit
-  - "$1,200" vs "1200" → same number, different format
-  - "john@gmail.com" vs "JOHN@GMAIL.COM" → same email
+THE BIG PROBLEM: Incident reports are messy and inconsistent.
+  - "kiran.r" vs "Kiran R" → same person, different format
+  - "847G" vs "847" → same number, different unit notation
+  - "CF" vs "Cloudflare" → same company, abbreviated vs full name
+  - "api-gw" vs "api-gateway" → same service, abbreviated vs full name
 
 Approach: Different grading strategies for different field types.
   - "exact"    → must match exactly (after normalization)
+               → used for ticket IDs, incident IDs, service versions
   - "numeric"  → extract numbers and compare
+               → used for lag ms, traffic gbps, pod counts, durations
   - "contains" → ground truth must appear inside the answer (or vice versa)
+               → used for timestamps, severity levels, status fields
   - "fuzzy"    → character-level similarity score (no external libraries!)
+               → used for engineer names, service names, attack types
+  - "list"     → compare lists of items by membership intersection
+               → used for affected regions, degraded services, endpoints
 
 Every field gets a score from 0.0 to 1.0. The overall reward is the
-average of all field scores.
+average of all field scores, providing natural partial credit throughout
+the episode rather than sparse binary end-of-episode rewards.
 """
 
 import re

@@ -72,21 +72,52 @@ This multi-strategy approach provides **natural partial credit** to prevent spar
 pip install openenv-core
 
 # Run server locally
-uvicorn server.app:app --host 0.0.0.0 --port 8000
+uvicorn server.app:app --host 0.0.0.0 --port 7860
 ```
 
 ## Docker
 
 ```bash
-docker build -t incident-report-env -f Dockerfile .
-docker run -p 8000:8000 incident-report-env
+docker build -t incident-report-env .
+docker run -p 7860:7860 incident-report-env
 ```
 
 ## Baseline Scores
 
-| Model | Score |
-|-------|-------|
-| Qwen/Qwen2.5-72B-Instruct | TBD (to be evaluated)|
+Evaluated using `Qwen/Qwen2.5-72B-Instruct` via HuggingFace Inference Router.
+
+| Task | Difficulty | Fields | Score |
+|------|------------|--------|-------|
+| easy_1 | Easy | 6 | 1.00 |
+| easy_2 | Easy | 7 | 0.93 |
+| easy_3 | Easy | 6 | 0.93 |
+| medium_1 | Medium | 9 | 0.70 |
+| medium_2 | Medium | 9 | 0.93 |
+| medium_3 | Medium | 9 | 0.84 |
+| hard_1 | Hard | 13 | 0.85 |
+| hard_2 | Hard | 13 | 0.83 |
+| hard_3 | Hard | 13 | 0.94 |
+| **Average** | — | — | **0.885** |
+
+## Running Inference
+
+Set required environment variables then run:
+
+### Linux/Mac
+```bash
+export HF_TOKEN="your_token"
+export API_BASE_URL="https://router.huggingface.co/v1"
+export MODEL_NAME="Qwen/Qwen2.5-72B-Instruct"
+python inference.py
+```
+
+### Windows PowerShell
+```powershell
+$env:HF_TOKEN="your_token"
+$env:API_BASE_URL="https://router.huggingface.co/v1"
+$env:MODEL_NAME="Qwen/Qwen2.5-72B-Instruct"
+python inference.py
+```
 
 ## Environment Variables Required
 When running `inference.py`, the following environment variables MUST be provided:
@@ -103,5 +134,5 @@ To validate your submission locally:
 
 ```bash
 chmod +x validate-submission.sh
-./validate-submission.sh https://your-space.hf.space
+./validate-submission.sh https://HardikJha-openenv-incident-rl.hf.space
 ```

@@ -12,4 +12,4 @@ runtime:
   language: python
   version: "3.11"
 app:
-  port: 8000
+  port: 7860
