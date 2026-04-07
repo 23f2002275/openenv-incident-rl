@@ -1,15 +1,49 @@
 spec_version: 1
-name: incident-report-env
+name: incident_report_structuring
 type: environment
 description: >
   An environment where LLM agents extract structured data from messy
   IT incident reports written by on-call engineers. Features 9 tasks
-  across 3 difficulty levels covering service outages, security 
-  incidents, and performance degradations. Partial credit fuzzy 
-  matching graders ensure meaningful reward signal throughout 
-  the episode.
+  across 3 difficulty levels with programmatic graders scoring 0.0-1.0.
 runtime:
   language: python
   version: "3.11"
 app:
   port: 7860
+tasks:
+  - id: easy_1
+    difficulty: easy
+    description: Simple web service login downtime
+    has_grader: true
+  - id: easy_2
+    difficulty: easy
+    description: Database connection pool exhaustion
+    has_grader: true
+  - id: easy_3
+    difficulty: easy
+    description: API rate limit breach
+    has_grader: true
+  - id: medium_1
+    difficulty: medium
+    description: Microservice cascade failure
+    has_grader: true
+  - id: medium_2
+    difficulty: medium
+    description: Security unauthorized access attempt
+    has_grader: true
+  - id: medium_3
+    difficulty: medium
+    description: CI/CD pipeline failure blocking deployments
+    has_grader: true
+  - id: hard_1
+    difficulty: hard
+    description: Multi-region DB replication lag
+    has_grader: true
+  - id: hard_2
+    difficulty: hard
+    description: DDoS attack with partial CDN mitigation
+    has_grader: true
+  - id: hard_3
+    difficulty: hard
+    description: Memory leak causing fleet-wide degradation
+    has_grader: true
