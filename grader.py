@@ -277,9 +277,9 @@ def grade_extraction(extracted_data: dict, ground_truth: dict, field_types: dict
     fields_correct = sum(1 for s in field_scores.values() if s >= 0.8)
     fields_total = len(ground_truth)
     
-    # Overall reward = average of field scores
+    # Overall reward = average of field scores, clamped to strict (0, 1)
     reward = sum(field_scores.values()) / fields_total if fields_total > 0 else 0.0
-    reward = round(min(1.0, reward), 3)
+    reward = round(max(0.001, min(0.999, reward)), 3)
     
     return {
         "field_scores": field_scores,

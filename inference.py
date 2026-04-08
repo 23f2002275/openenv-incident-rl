@@ -163,21 +163,21 @@ async def main() -> None:
     validator can count distinct tasks with graders.
     """
 
-    # Connect to the running environment server
-    env = IncidentEnv(base_url=ENV_URL)
+    MAX_RETRIES = 2
 
-    try:
-        async with env:
-            for task in TASKS:
-                task_id = task["id"]
-                rewards: List[float] = []
-                steps_taken = 0
-                score = 0.0
-                success = False
+    for task in TASKS:
+        task_id = task["id"]
+        rewards: List[float] = []
+        steps_taken = 0
+        score = 0.0
+        success = False
 
-                log_start(task=task_id, env=BENCHMARK, model=MODEL_NAME)
+        log_start(task=task_id, env=BENCHMARK, model=MODEL_NAME)
 
-                try:
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                env = IncidentEnv(base_url=ENV_URL)
+                async with env:
                     # Reset environment with a specific task
                     result = await env.reset(task_id=task_id)
                     obs = result.observation
@@ -194,7 +194,7 @@ async def main() -> None:
                         IncidentAction(extracted_data=extracted)
                     )
 
-                    reward = result.reward or 0.0
+                    reward = result.reward or 0.001
                     done = result.done
                     rewards.append(reward)
                     steps_taken = 1
@@ -203,17 +203,23 @@ async def main() -> None:
                     log_step(step=1, action=action_desc, reward=reward, done=done, error=None)
 
                     score = reward
-                    score = min(max(score, 0.0), 1.0)
+                    score = max(0.001, min(0.999, score))
                     success = score >= SUCCESS_THRESHOLD
+                    break  # success, no retry needed
 
-                except Exception as e:
-                    print(f"[DEBUG] Task {task_id} failed: {e}", flush=True)
+            except Exception as e:
+                print(f"[DEBUG] Task {task_id} attempt {attempt} failed: {e}", flush=True)
+                if attempt < MAX_RETRIES:
+                    await asyncio.sleep(2)
+                else:
+                    # All retries exhausted — emit a minimal valid score
+                    score = 0.001
+                    rewards = [score]
+                    steps_taken = 1
+                    log_step(step=1, action=f"fallback({task_id})", reward=score, done=True, error=str(e)[:80])
+                    success = False
 
-                finally:
-                    log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
-
-    except Exception as e:
-        print(f"[DEBUG] Fatal exception: {e}", flush=True)
+        log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
 
 if __name__ == "__main__":
