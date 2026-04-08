@@ -14,7 +14,7 @@ tags:
 ---
 # Incident Report Structuring Environment
 
-**Live Environment:** https://HardikJha-openenv-incident-rl.hf.space
+**Live Environment:** https://pratham-math-openenv-incident-rl.hf.space/
 
 ## Environment Description
 An OpenEnv environment where LLM agents extract structured data from messy IT incident reports written by on-call engineers. Features 9 tasks across 3 difficulty levels covering service outages, security incidents, and performance degradations. Partial credit fuzzy matching graders ensure meaningful reward signal throughout the episode.
@@ -142,5 +142,5 @@ To validate your submission locally:
 
 ```bash
 chmod +x validate-submission.sh
-./validate-submission.sh https://HardikJha-openenv-incident-rl.hf.space
+./validate-submission.sh https://pratham-math-openenv-incident-rl.hf.space/
 ```
