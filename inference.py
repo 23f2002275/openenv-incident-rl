@@ -158,66 +158,62 @@ async def main() -> None:
     """
     Connect to the environment, loop through all tasks,
     ask LLM to extract, submit, and log in hackathon format.
-    """
 
-    rewards: List[float] = []
-    steps_taken = 0
-    score = 0.0
-    success = False
+    Each task gets its own [START]...[STEP]...[END] block so the
+    validator can count distinct tasks with graders.
+    """
 
     # Connect to the running environment server
     env = IncidentEnv(base_url=ENV_URL)
 
-    log_start(task="incident_report", env=BENCHMARK, model=MODEL_NAME)
-
     try:
         async with env:
-            for step_num, task in enumerate(TASKS, start=1):
+            for task in TASKS:
                 task_id = task["id"]
+                rewards: List[float] = []
+                steps_taken = 0
+                score = 0.0
+                success = False
 
-                # Reset environment with a specific task
-                result = await env.reset(task_id=task_id)
-                obs = result.observation
+                log_start(task=task_id, env=BENCHMARK, model=MODEL_NAME)
 
-                # Ask the LLM to extract data from the raw text
-                extracted = ask_llm_to_extract(
-                    raw_text=obs.raw_text,
-                    fields=obs.fields_to_extract,
-                    hints=obs.extraction_hints,
-                )
+                try:
+                    # Reset environment with a specific task
+                    result = await env.reset(task_id=task_id)
+                    obs = result.observation
 
-                # Submit the extraction to the environment for grading
-                result = await env.step(
-                    IncidentAction(extracted_data=extracted)
-                )
+                    # Ask the LLM to extract data from the raw text
+                    extracted = ask_llm_to_extract(
+                        raw_text=obs.raw_text,
+                        fields=obs.fields_to_extract,
+                        hints=obs.extraction_hints,
+                    )
 
-                reward = result.reward or 0.0
-                done = result.done
-                rewards.append(reward)
-                steps_taken = step_num
+                    # Submit the extraction to the environment for grading
+                    result = await env.step(
+                        IncidentAction(extracted_data=extracted)
+                    )
 
-                # Short action description for the log line
-                action_desc = f"extract({task_id}:{len(extracted)}fields)"
+                    reward = result.reward or 0.0
+                    done = result.done
+                    rewards.append(reward)
+                    steps_taken = 1
 
-                log_step(
-                    step=step_num,
-                    action=action_desc,
-                    reward=reward,
-                    done=done,
-                    error=None,
-                )
+                    action_desc = f"extract({task_id}:{len(extracted)}fields)"
+                    log_step(step=1, action=action_desc, reward=reward, done=done, error=None)
 
-            # Final score = average reward across all tasks
-            score = sum(rewards) / len(rewards) if rewards else 0.0
-            score = min(max(score, 0.0), 1.0)
-            success = score >= SUCCESS_THRESHOLD
+                    score = reward
+                    score = min(max(score, 0.0), 1.0)
+                    success = score >= SUCCESS_THRESHOLD
+
+                except Exception as e:
+                    print(f"[DEBUG] Task {task_id} failed: {e}", flush=True)
+
+                finally:
+                    log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
     except Exception as e:
-        print(f"[DEBUG] Exception during inference: {e}", flush=True)
-        success = False
-
-    finally:
-        log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
+        print(f"[DEBUG] Fatal exception: {e}", flush=True)
 
 
 if __name__ == "__main__":
