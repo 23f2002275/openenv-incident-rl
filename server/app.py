@@ -23,6 +23,8 @@ app = create_app(
 from fastapi.responses import JSONResponse
 from tasks import TASKS
 
+app.router.routes = [r for r in app.router.routes if getattr(r, "path", None) != "/metadata"]
+
 @app.get("/metadata", include_in_schema=False)
 async def metadata_override():
     return JSONResponse({
